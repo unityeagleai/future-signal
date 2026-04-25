@@ -1,0 +1,26 @@
+{
+  "name": "Future Signal",
+  "short_name": "Future Signal",
+  "description": "Daily transmissions from your future self",
+  "start_url": "/future-signal/",
+  "display": "standalone",
+  "background_color": "#0A0E1F",
+  "theme_color": "#0A0E1F",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "productivity"],
+  "prefer_related_applications": false
+}
