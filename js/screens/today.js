@@ -123,6 +123,16 @@ function renderSignal(el, signal) {
         Archive
       </button>
     </div>
+    <div class="action-row" style="margin-top:10px;">
+      <button class="btn-ghost" id="copy-letter-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy Letter
+      </button>
+      <button class="btn-ghost" id="export-audio-btn" ${!signal.audioUrl ? 'style="opacity:0.4;cursor:not-allowed;"' : ''}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export Audio
+      </button>
+    </div>
     <div id="save-msg" style="display:none;text-align:center;padding:8px;font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.12em;color:var(--amber);text-transform:uppercase;">
       ✦ Signal saved
     </div>
@@ -218,6 +228,9 @@ function setupAudioPlayer(content, signal) {
         playBtn.style.opacity = '1';
         playBtn.style.cursor = 'pointer';
         ttsBt.style.display = 'none';
+        // Enable export button now that audio exists
+        const exportBtn = content.querySelector('#export-audio-btn');
+        if (exportBtn) { exportBtn.style.opacity = '1'; exportBtn.style.cursor = 'pointer'; }
         showToast('Voice generated');
       } catch (e) {
         showToast('TTS error: ' + e.message, 3500);
@@ -240,6 +253,40 @@ function setupButtons(content, signal) {
   });
 
   content.querySelector('#archive-btn').addEventListener('click', () => navigate('archive'));
+
+  // Copy letter to clipboard
+  content.querySelector('#copy-letter-btn').addEventListener('click', async () => {
+    const letterText = buildLetterText(signal);
+    const full = `${signal.title || 'Transmission'}\n${signal.futureDate ? '— ' + signal.futureDate : ''}\n\n${letterText}\n\n— Future You`;
+    try {
+      await navigator.clipboard.writeText(full);
+      showToast('Letter copied to clipboard');
+    } catch {
+      // Fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = full;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Letter copied');
+    }
+  });
+
+  // Export audio as download
+  const exportBtn = content.querySelector('#export-audio-btn');
+  exportBtn.addEventListener('click', () => {
+    if (!signal.audioUrl) { showToast('Generate voice first'); return; }
+    const a = document.createElement('a');
+    a.href = signal.audioUrl;
+    const safeName = (signal.title || 'transmission').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40);
+    a.download = `future-signal-${safeName}.wav`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('Audio export started');
+  });
 }
 
 async function generateNewSignal(el) {
